@@ -1,0 +1,53 @@
+### 
+//Delete person with id 2
+DELETE http://localhost:3001/api/persons/2
+
+### 
+//Get all people
+GET http://localhost:3001/api/persons/
+
+###
+// Get person with id 3
+GET http://localhost:3001/api/persons/3
+
+### 
+// Create a person
+POST http://localhost:3001/api/persons/ HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Tester Testerson",
+  "number": "12-3456-78"
+}
+
+###
+// Create person, should fail with missing name
+POST http://localhost:3001/api/persons/ HTTP/1.1
+content-type: application/json
+
+{
+  "number": "87-6543-21"
+}
+
+###
+// Create person, should fail with missing number
+POST http://localhost:3001/api/persons/ HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Nosretset Retset"
+}
+
+###
+// Create person, should fail with non-unique name
+POST http://localhost:3001/api/persons/ HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Arto Hellas",
+  "number": "12-3456-78"
+}
+
+###
+// Get info
+GET http://localhost:3001/info

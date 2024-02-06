@@ -58,6 +58,29 @@ app.delete("/api/persons/:id", (request, response) => {
   response.status(204).end()
 })
 
+// Add a new person
+app.post("/api/persons", (request, response) => {
+  const body = request.body
+
+  if (!body.name) {
+    return response.status(400).json({ error: "Missing person name." })
+  } else if (!body.number) {
+    return response.status(400).json({ error: "Missing phone number."})
+  } else if (persons.find(person => person.name === body.name)) {
+    return response.status(400).json({ error: "Name must be unique."})
+  }
+
+  const person = {
+    name: body.name,
+    number: body.number,
+    id: generateId(1, 10000)
+  }
+
+  persons = persons.concat(person)
+
+  response.json(person)
+})
+
 // Helper method to generate string for info endpoint
 const generateInfoString = (timeRequested, numOfEntries) => {
   const infoString = `
@@ -65,6 +88,16 @@ const generateInfoString = (timeRequested, numOfEntries) => {
   <p>${timeRequested}</p>
   `
   return infoString
+}
+
+// Helper method generate random ID integer in range (min, max)
+const generateId = (min, max) => {
+  const newId = Math.floor(Math.random() * (max - min + 1) + min)
+  if (persons.find(person => person.id === newId)) {
+    return generateId(min, max)
+  } else {
+    return newId
+  }
 }
 
 const PORT = 3001
