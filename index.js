@@ -1,4 +1,5 @@
 const express = require("express")
+
 const app = express()
 
 app.use(express.json())
@@ -28,7 +29,43 @@ let persons = [
   }
 ]
 
+// Get all entries
 app.get("/api/persons", (request, response) => response.json(persons))
+
+// Additional information
+app.get("/info", (request, response) => {
+  const timeRequested = new Date()
+  const numOfEntries = persons.length
+  response.send(generateInfoString(timeRequested, numOfEntries))
+})
+
+// Get one person
+app.get("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id)
+  const person = persons.find(p => p.id === id)
+
+  if (person) {
+    response.json(person)
+  } else {
+    response.status(404).end()
+  }
+})
+
+// Delete an entry
+app.delete("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id)
+  persons = persons.filter(p => p.id !== id)
+  response.status(204).end()
+})
+
+// Helper method to generate string for info endpoint
+const generateInfoString = (timeRequested, numOfEntries) => {
+  const infoString = `
+  <p>Phonebook contains details for ${numOfEntries} people.</p>
+  <p>${timeRequested}</p>
+  `
+  return infoString
+}
 
 const PORT = 3001
 app.listen(PORT, () => {
