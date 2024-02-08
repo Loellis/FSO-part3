@@ -33,18 +33,23 @@ const errorHandler = (error, request, response, next) => {
 
 app.use(errorHandler)
 
-// Get all entries
-app.get("/api/persons", (request, response) => {
-  Person.find({}).then(persons => {
-    response.json(persons)
-  })
+// Additional information
+app.get("/info", (request, response, next) => {
+  Person.countDocuments({})
+    .then(numOfEntries => {
+      const timeRequested = new Date()
+      response.send(generateInfoString(timeRequested, numOfEntries))
+    })
+    .catch(error => next(error))
 })
 
-// Additional information
-app.get("/info", (request, response) => {
-  const timeRequested = new Date()
-  const numOfEntries = persons.length
-  response.send(generateInfoString(timeRequested, numOfEntries))
+// Get all entries
+app.get("/api/persons", (request, response, next) => {
+  Person.find({})
+    .then(persons => {
+      response.json(persons)
+    })
+    .catch(error => next(error))
 })
 
 // Get one person
