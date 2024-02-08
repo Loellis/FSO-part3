@@ -1,6 +1,8 @@
+require("dotenv").config()
 const express = require("express")
 const morgan = require("morgan")
 const cors = require("cors")
+const Person = require("./models/person")
 
 const app = express()
 
@@ -42,7 +44,11 @@ let persons = [
 ]
 
 // Get all entries
-app.get("/api/persons", (request, response) => response.json(persons))
+app.get("/api/persons", (request, response) => {
+  Person.find({}).then(persons => {
+    response.json(persons)
+  })
+})
 
 // Additional information
 app.get("/info", (request, response) => {
@@ -78,19 +84,16 @@ app.post("/api/persons", (request, response) => {
     return response.status(400).json({ error: "Missing person name." })
   } else if (!body.number) {
     return response.status(400).json({ error: "Missing phone number."})
-  } else if (persons.find(person => person.name === body.name)) {
-    return response.status(400).json({ error: "Name must be unique."})
   }
 
-  const person = {
+  const person = new Person({
     name: body.name,
     number: body.number,
-    id: generateId(1, 10000)
-  }
+  })
 
-  persons = persons.concat(person)
-
-  response.json(person)
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
 })
 
 // Helper method to generate string for info endpoint
@@ -102,17 +105,7 @@ const generateInfoString = (timeRequested, numOfEntries) => {
   return infoString
 }
 
-// Helper method generate random ID integer in range (min, max)
-const generateId = (min, max) => {
-  const newId = Math.floor(Math.random() * (max - min + 1) + min)
-  if (persons.find(person => person.id === newId)) {
-    return generateId(min, max)
-  } else {
-    return newId
-  }
-}
-
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server listening to port ${PORT}`)
 })
