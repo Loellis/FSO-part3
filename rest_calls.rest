@@ -17,7 +17,7 @@ content-type: application/json
 
 {
   "name": "Tester Testerson",
-  "number": "12-3456-78"
+  "number": "12-345678"
 }
 
 ###
@@ -26,7 +26,7 @@ POST http://localhost:3001/api/persons/ HTTP/1.1
 content-type: application/json
 
 {
-  "number": "87-6543-21"
+  "number": "87-654321"
 }
 
 ###
@@ -45,7 +45,7 @@ content-type: application/json
 
 {
   "name": "Te",
-  "number": "12-3456-78"
+  "number": "12-345678"
 }
 
 ### 
@@ -58,6 +58,16 @@ content-type: application/json
   "number": "12-3456"
 }
 
+### 
+// Create a person, should fail with wrong number format
+POST http://localhost:3001/api/persons/ HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Test Testerson",
+  "number": "12-34567"
+}
+
 ###
 // Create person, should update number
 POST http://localhost:3001/api/persons/ HTTP/1.1
@@ -65,7 +75,7 @@ content-type: application/json
 
 {
   "name": "Arto Hellas",
-  "number": "12-3456-78"
+  "number": "12-345678"
 }
 
 ###
