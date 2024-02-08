@@ -25,8 +25,8 @@ const createNewPerson = () => {
     name: process.argv[3],
     number: process.argv[4],
   })
-  
-  person.save().then(result => {
+
+  person.save().then(() => {
     console.log("Person stored to database.")
     mongoose.connection.close()
   })

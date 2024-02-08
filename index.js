@@ -13,9 +13,9 @@ app.use(cors())
 // Logging handler
 morgan.token("json_data",  (request) => {
   if (request.method === "POST") {
-    return JSON.stringify(request.body) 
+    return JSON.stringify(request.body)
   }
-  return "" 
+  return ""
 })
 
 app.use(morgan(":method :url :status :res[content-length] - :response-time ms :json_data"))
@@ -53,7 +53,7 @@ app.get("/api/persons/:id", (request, response, next) => {
 // Delete an entry
 app.delete("/api/persons/:id", (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
-    .then(result => response.status(204).end())
+    .then(() => response.status(204).end())
     .catch(error => next(error))
 })
 
@@ -63,7 +63,7 @@ app.put("/api/persons/:id", (request, response, next) => {
 
   Person.findByIdAndUpdate(
     request.params.id,
-    { name, number }, 
+    { name, number },
     { new: true, runValidators: true, context: "query" }
   )
     .then(updatedPerson => response.json(updatedPerson))
