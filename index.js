@@ -10,6 +10,7 @@ app.use(express.static("dist"))
 app.use(express.json())
 app.use(cors())
 
+// Logging handler
 morgan.token("json_data",  (request) => {
   if (request.method === "POST") {
     return JSON.stringify(request.body) 
@@ -18,6 +19,19 @@ morgan.token("json_data",  (request) => {
 })
 
 app.use(morgan(":method :url :status :res[content-length] - :response-time ms :json_data"))
+
+// Error handler
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "Malformed ID" })
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)
 
 // Get all entries
 app.get("/api/persons", (request, response) => {
@@ -55,6 +69,23 @@ app.delete("/api/persons/:id", (request, response, next) => {
     .catch(error => next(error))
 })
 
+// Update number of existing person
+app.put("/api/persons/:id", (request, response, next) => {
+  const body = request.body
+
+  const person = {
+    name: body.name,
+    number: body.number
+  }
+
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then(updatedPerson => {
+      response.json(updatedPerson)
+    })
+    .catch(error => next(error))
+
+})
+
 // Add a new person
 app.post("/api/persons", (request, response) => {
   const body = request.body
@@ -74,19 +105,6 @@ app.post("/api/persons", (request, response) => {
     response.json(savedPerson)
   })
 })
-
-// Error handler
-const errorHandler = (error, request, response, next) => {
-  console.error(error.message)
-
-  if (error.name === "CastError") {
-    return response.status(400).send({ error: "Malformed ID" })
-  }
-
-  next(error)
-}
-
-app.use(errorHandler)
 
 // Helper method to generate string for info endpoint
 const generateInfoString = (timeRequested, numOfEntries) => {
