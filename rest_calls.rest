@@ -38,8 +38,28 @@ content-type: application/json
   "name": "Nosretset Retset"
 }
 
+### 
+// Create a person, should fail with too short name
+POST http://localhost:3001/api/persons/ HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Te",
+  "number": "12-3456-78"
+}
+
+### 
+// Create a person, should fail with too short number
+POST http://localhost:3001/api/persons/ HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Test Testerson",
+  "number": "12-3456"
+}
+
 ###
-// Create person, should fail with non-unique name
+// Create person, should update number
 POST http://localhost:3001/api/persons/ HTTP/1.1
 content-type: application/json
 

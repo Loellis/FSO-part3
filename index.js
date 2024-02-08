@@ -20,19 +20,6 @@ morgan.token("json_data",  (request) => {
 
 app.use(morgan(":method :url :status :res[content-length] - :response-time ms :json_data"))
 
-// Error handler
-const errorHandler = (error, request, response, next) => {
-  console.error(error.message)
-
-  if (error.name === "CastError") {
-    return response.status(400).send({ error: "Malformed ID" })
-  }
-
-  next(error)
-}
-
-app.use(errorHandler)
-
 // Additional information
 app.get("/info", (request, response, next) => {
   Person.countDocuments({})
@@ -46,9 +33,7 @@ app.get("/info", (request, response, next) => {
 // Get all entries
 app.get("/api/persons", (request, response, next) => {
   Person.find({})
-    .then(persons => {
-      response.json(persons)
-    })
+    .then(persons => response.json(persons))
     .catch(error => next(error))
 })
 
@@ -68,48 +53,51 @@ app.get("/api/persons/:id", (request, response, next) => {
 // Delete an entry
 app.delete("/api/persons/:id", (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
-    .then(result => {
-      response.status(204).end()
-    })
+    .then(result => response.status(204).end())
     .catch(error => next(error))
 })
 
 // Update number of existing person
 app.put("/api/persons/:id", (request, response, next) => {
-  const body = request.body
+  const { name, number } = request.body
 
-  const person = {
-    name: body.name,
-    number: body.number
-  }
-
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
-    .then(updatedPerson => {
-      response.json(updatedPerson)
-    })
+  Person.findByIdAndUpdate(
+    request.params.id,
+    { name, number }, 
+    { new: true, runValidators: true, context: "query" }
+  )
+    .then(updatedPerson => response.json(updatedPerson))
     .catch(error => next(error))
-
 })
 
 // Add a new person
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const body = request.body
-
-  if (!body.name) {
-    return response.status(400).json({ error: "Missing person name." })
-  } else if (!body.number) {
-    return response.status(400).json({ error: "Missing phone number."})
-  }
 
   const person = new Person({
     name: body.name,
     number: body.number,
   })
 
-  person.save().then(savedPerson => {
-    response.json(savedPerson)
-  })
+  person.save()
+    .then(savedPerson => response.json(savedPerson))
+    .catch(error => next(error))
 })
+
+// Error handler
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "Malformed ID" })
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message })
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)
 
 // Helper method to generate string for info endpoint
 const generateInfoString = (timeRequested, numOfEntries) => {
